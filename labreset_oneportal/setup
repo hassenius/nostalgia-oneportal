@@ -1,0 +1,17 @@
+#!/bin/bash
+mkdir -p ~/bin
+ln -s --backup ${PWD}/bin/labreset ~/bin/labreset
+
+if [[ -d ~/lab_template ]]
+then
+    if [[ -L ~/lab_template ]]
+    then
+        # Already a symlink
+        echo "labreset directory already setup"
+    else
+        # Backup the real directory
+        mv ~/lab_template ~/lab_template
+    fi
+fi
+
+ln -sf ${PWD}/lab_template ~/lab_template 

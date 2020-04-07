@@ -1,0 +1,63 @@
+#!/bin/bash
+template_dir="${HOME}/lab_template"
+lab_dir="${HOME}/lab"
+action=${1}
+chapter=${2}
+file=${3}
+#action=reset|compare
+
+case $action in
+"reset")
+
+    case $chapter in
+    2.[1-5])
+      # Make sure we're in the lab directory
+      cd ${lab_dir}
+      echo "Setting code to $chapter"
+
+      # Copy the code files from the section, and overwrite any existing files
+      if [[ `ls -A ${template_dir}/Sections/${chapter}/files` ]]
+      then
+        cp -Rf ${template_dir}/Sections/${chapter}/files/* .
+      fi
+
+      # Run the setup script for the section if it exists
+      if [[ -x ${template_dir}/Sections/${chapter}/script.sh ]]
+      then
+        ${template_dir}/Sections/${chapter}/script.sh $template_dir $lab_dir $chapter
+      fi
+
+      # Print any endnotes if they exist
+      if [[ -e ${template_dir}/Sections/${chapter}/endnote ]]
+      then
+        cat ${template_dir}/Sections/${chapter}/endnote
+      fi
+      ;;
+
+    *)
+      echo "Unknown section. Please check syntax and try again"
+      ;;
+    esac
+    ;;
+"compare")
+  vimdiff $file $template_dir/Sections/$chapter/files/$file
+  ;;
+*)
+  cat <<EOT
+  Usage:
+  $(basename ${0}) <operation> <chapter> {file}
+
+  Commands:
+    reset       Reset the lab code to end of a given section
+    compare     Compare the current code with the expected code at a given section
+
+  Examples
+    $(basename ${0}) reset 2.2                        Resets the current code to what it's expected to look like after chapter 2.2
+    $(basename ${0}) compare 2.1 server.py            diff server.py with what it is expected to look like after chapter 2.1
+    $(basename ${0}) compare 2.3 templates/index.html diff index.html with what it is expected to look like after chapter 2.3
+EOT
+  ;;
+esac
+  
+
+
